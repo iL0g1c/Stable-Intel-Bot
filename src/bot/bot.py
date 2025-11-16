@@ -231,7 +231,7 @@ class StableIntelBot(commands.Bot):
         return channel
         
     async def _load_extensions(self) -> None:
-        for extension in ("chatLoggin",):
+        for extension in ("chatLogging",):
             await self.load_extension(f"cogs.{extension}")
 
 bot = StableIntelBot(BOT_TOKEN)
