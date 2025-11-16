@@ -41,7 +41,7 @@ class StableIntelBot(commands.Bot):
         self.task_queue = asyncio.Queue()
 
         self.lock = asyncio.Lock()
-        self.config = self.load_config("config.json")
+        self.config = self.load_config("src/botconfig.json")
         self.setup_routes()
 
     def load_config(self, config_path):
