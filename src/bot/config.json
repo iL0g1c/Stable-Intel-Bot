@@ -1,0 +1,15 @@
+{
+    "displayAircraftChanges": true,
+    "displayNewAccounts": true,
+    "displayCallsignChanges": true,
+    "displayChat": true,
+    "displayTeleporations": true,
+    "displayActivityChanges": true,
+    "aircraftChangeLogChannel": 1439394257281486881,
+    "newAccountLogChannel": 1439404624401399848,
+    "callsignChangeLogChannel": 1439394223777386496,
+    "chatLogChannel": 1439394208627822602,
+    "teleporationLogChannel": 1439394274008633567,
+    "activityChangeLogChannel": 1439394239443243068,
+    "developerRole": 1439393953974587462
+}
