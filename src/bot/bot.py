@@ -122,7 +122,7 @@ class StableIntelBot(commands.Bot):
         # process tasks from the queue
         while True:
             task_type, data = await self.task_queue.get()
-            print(task_type)
+            self.logger.log(20, task_type)
             if task_type == "aircraft-change":
                 await self.process_aircraft_change(data)
             elif task_type == "new-account":
@@ -132,7 +132,7 @@ class StableIntelBot(commands.Bot):
             elif task_type == "teleporation":
                 await self.process_teleportation(data)
             elif task_type == "activity-change":
-                print(1)
+                self.logger.log(20, 1)
                 await self.process_activity_change(data)
             self.task_queue.task_done()
     
@@ -196,7 +196,7 @@ class StableIntelBot(commands.Bot):
         channel = self.get_channel_config("activity-change")
         if not channel or not self.config.get("displayActivityChanges", True):
             return
-        print(data)
+        self.logger.log(20, data)
         embeds = [
             discord.Embed(
                 title="Activity Change",
