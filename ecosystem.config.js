@@ -3,7 +3,7 @@ module.exports = {
       {
         name: "StableIntel",
         script: "src/bot/bot.py",
-        interpreter: "src/venv/bin/python",
+        interpreter: "venv/bin/python",
         env: {
 
         },
