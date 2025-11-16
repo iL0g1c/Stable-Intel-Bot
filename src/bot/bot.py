@@ -82,10 +82,6 @@ class StableIntelBot(commands.Bot):
         self.loop.create_task(self.process_tasks())
 
     def setup_routes(self):
-        @self.flaskApp.route("/bot-mention", methods=["POST"])
-        def bot_mention():
-            asyncio.run_coroutine_threadsafe(self.task_queue.put(("mention", None)), self.loop)
-            return "", 204
         @self.flaskApp.route("/aircraft-change", methods=["POST"])
         def aircraft_change():
             data = request.json
@@ -107,6 +103,20 @@ class StableIntelBot(commands.Bot):
                 return 'Invalid data format. Expected a list.', 400
             asyncio.run_coroutine_threadsafe(self.task_queue.put(("callsign-change", data)), self.loop)
             return "", 204
+        @self.flaskApp.route("/teleporation", methods=["POST"])
+        def callsign_change():
+            data = request.json
+            if not isinstance(data, list):
+                return 'Invalid data format. Expected a list.', 400
+            asyncio.run_coroutine_threadsafe(self.task_queue.put(("teleporation", data)), self.loop)
+            return "", 204
+        @self.flaskApp.route("/activity-change", methods=["POST"])
+        def callsign_change():
+            data = request.json
+            if not isinstance(data, list):
+                return 'Invalid data format. Expected a list.', 400
+            asyncio.run_coroutine_threadsafe(self.task_queue.put(("activity-change", data)), self.loop)
+            return "", 204
 
     async def process_tasks(self):
         # process tasks from the queue
@@ -118,6 +128,10 @@ class StableIntelBot(commands.Bot):
                 await self.process_new_account(data)
             elif task_type == "callsign-change":
                 await self.process_callsign_change(data)
+            elif task_type == "teleporation":
+                await self.process_teleportation(data)
+            elif task_type == "activity-change":
+                await self.process_activity_change(data)
             self.task_queue.task_done()
     
     async def process_aircraft_change(self, data):
@@ -161,6 +175,34 @@ class StableIntelBot(commands.Bot):
             ) for callsign_data in data
         ]
         await self.send_embeds(channel, embeds)
+
+    async def process_teleportation(self, data):
+        channel = self.get_channel_config("teleporation")
+        if not channel or not self.config.get("displayTeleporations", True):
+            return
+        
+        embeds = [
+            discord.Embed(
+                title="Teleporation",
+                description=f"",
+                color=discord.Color.green()
+            ) for callsign_data in data
+        ]
+        await self.send_embeds(channel, embeds)
+
+    async def process_activity_change(self, data):
+        channel = self.get_channel_config("activity-change")
+        if not channel or not self.config.get("displayActivityChanges", True):
+            return
+        
+        embeds = [
+            discord.Embed(
+                title="Teleporation",
+                description=f"",
+                color=discord.Color.green()
+            ) for callsign_data in data
+        ]
+        await self.send_embeds(channel, embeds)
     
     async def send_embeds(self, channel, embeds):
         async with self.lock:
@@ -175,6 +217,10 @@ class StableIntelBot(commands.Bot):
             channel = self.get_channel(self.config["newAccountLogChannel"])
         elif event_type == "callsign-change":
             channel = self.get_channel(self.config["callsignChangeLogChannel"])
+        elif event_type == "teleporation":
+            channel = self.get_channel(self.config["teleporationLogChannel"])
+        elif event_type == "activity-change":
+            channel = self.get_channel(self.config["activityChangeLogChannel"])
         else:
             self.logger.log(40, f"Invalid event type: {event_type}")
             return None
