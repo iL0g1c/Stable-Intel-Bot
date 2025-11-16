@@ -184,9 +184,9 @@ class StableIntelBot(commands.Bot):
         embeds = [
             discord.Embed(
                 title="Teleporation",
-                description=f"",
+                description=f"{teleporation_data['acid']}\n Old Position: {teleporation_data['old'][0]}, {teleporation_data['old'][1]}\n New Position: {teleporation_data['pos'][0]}, {teleporation_data['pos'][1]}\n Distance: {teleporation_data['dist']} km",
                 color=discord.Color.green()
-            ) for callsign_data in data
+            ) for teleporation_data in data
         ]
         await self.send_embeds(channel, embeds)
 
@@ -197,10 +197,10 @@ class StableIntelBot(commands.Bot):
         
         embeds = [
             discord.Embed(
-                title="Teleporation",
-                description=f"",
+                title="Activity Change",
+                description=f"{activity_data['acid']}\n Status: {activity_data['status']}",
                 color=discord.Color.green()
-            ) for callsign_data in data
+            ) for activity_data in data
         ]
         await self.send_embeds(channel, embeds)
     
