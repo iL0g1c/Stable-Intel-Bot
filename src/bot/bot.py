@@ -185,7 +185,7 @@ class StableIntelBot(commands.Bot):
         embeds = [
             discord.Embed(
                 title="Teleporation",
-                description=f"{teleporation_data['acid']}\n Old Position: {teleporation_data['old'][0]}, {teleporation_data['old'][1]}\n New Position: {teleporation_data['pos'][0]}, {teleporation_data['pos'][1]}\n Distance: {teleporation_data['dist']} km",
+                description=f"{teleporation_data['acid']}\n Old Position: {teleporation_data['oldLatitude']}, {teleporation_data['oldLongitude']}\n New Position: {teleporation_data['newLatitude']}, {teleporation_data['newLongitude']}\n Distance: {teleporation_data['distance']} km",
                 color=discord.Color.green()
             ) for teleporation_data in data
         ]
