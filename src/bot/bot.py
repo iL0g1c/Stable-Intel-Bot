@@ -115,6 +115,7 @@ class StableIntelBot(commands.Bot):
             data = request.json
             if not isinstance(data, list):
                 return 'Invalid data format. Expected a list.', 400
+            self.logger.log(20, 2)
             asyncio.run_coroutine_threadsafe(self.task_queue.put(("activity-change", data)), self.loop)
             return "", 204
 
