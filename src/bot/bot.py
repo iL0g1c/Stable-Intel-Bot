@@ -143,7 +143,7 @@ class StableIntelBot(commands.Bot):
         embeds = [
             discord.Embed(
                 title="Aircraft Change",
-                description=f"Callsign: {change_data['callsign']}\n Old Aircraft: {change_data['oldAircraft']}\n New Aircraft: {change_data['newAircraft']}",
+                description=f"**Callsign:** {change_data['callsign']}\n **Old Aircraft:** {change_data['oldAircraft']}\n **New Aircraft:** {change_data['newAircraft']}",
                 color=discord.Color.green()
             ) for change_data in data
         ]
@@ -154,13 +154,20 @@ class StableIntelBot(commands.Bot):
         if not channel or not self.config.get("displayNewAccounts", True):
             return
         
-        embeds = [
-            discord.Embed(
-                title="New Account",
-                description=f"Acoount ID: {account_data['acid']}\n Callsign: {account_data['callsign']}",
-                color=discord.Color.green()
-            ) for account_data in data
-        ]
+        embeds = []
+        for account_data in data:
+            if str(account_data['callsign']) == "":
+                callsign = "*NO CALLSIGN SET*"
+            else:
+                callsign = account_data['callsign']
+
+            embeds.append(
+                discord.Embed(
+                    title="New Account",
+                    description=f"**Account ID:** {account_data['acid']}\n **Callsign:** {callsign}",
+                    color=discord.Color.green()
+                )
+            )
         await self.send_embeds(channel, embeds)
 
     async def process_callsign_change(self, data):
@@ -171,7 +178,7 @@ class StableIntelBot(commands.Bot):
         embeds = [
             discord.Embed(
                 title="Callsign Change",
-                description=f"Acoount ID: {callsign_data['acid']}\n Old Callsign: {callsign_data['oldCallsign']}\n New Callsign: {callsign_data['newCallsign']}",
+                description=f"**Acoount ID:** {callsign_data['acid']}\n **Old Callsign:** {callsign_data['oldCallsign']}\n **New Callsign:** {callsign_data['newCallsign']}",
                 color=discord.Color.green()
             ) for callsign_data in data
         ]
@@ -185,7 +192,7 @@ class StableIntelBot(commands.Bot):
         embeds = [
             discord.Embed(
                 title="Teleporation",
-                description=f"{teleporation_data['acid']}\n Old Position: {teleporation_data['oldLatitude']}, {teleporation_data['oldLongitude']}\n New Position: {teleporation_data['newLatitude']}, {teleporation_data['newLongitude']}\n Distance: {teleporation_data['distance']} km",
+                description=f"**Account ID**: {teleporation_data['acid']}\n **Old Position:** {teleporation_data['oldLatitude']}, {teleporation_data['oldLongitude']}\n **New Position:** {teleporation_data['newLatitude']}, {teleporation_data['newLongitude']}\n **Distance:** {round(teleporation_data['distance'])} km",
                 color=discord.Color.green()
             ) for teleporation_data in data
         ]
@@ -198,7 +205,7 @@ class StableIntelBot(commands.Bot):
         embeds = [
             discord.Embed(
                 title="Activity Change",
-                description=f"{activity_data['acid']}\n Status: {activity_data['status']}",
+                description=f"**Account ID:** {activity_data['acid']}\n **Status:** {activity_data['status']}",
                 color=discord.Color.green()
             ) for activity_data in data
         ]
