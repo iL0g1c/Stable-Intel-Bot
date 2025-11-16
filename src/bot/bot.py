@@ -104,14 +104,14 @@ class StableIntelBot(commands.Bot):
             asyncio.run_coroutine_threadsafe(self.task_queue.put(("callsign-change", data)), self.loop)
             return "", 204
         @self.flaskApp.route("/teleporation", methods=["POST"])
-        def callsign_change():
+        def teleporation():
             data = request.json
             if not isinstance(data, list):
                 return 'Invalid data format. Expected a list.', 400
             asyncio.run_coroutine_threadsafe(self.task_queue.put(("teleporation", data)), self.loop)
             return "", 204
         @self.flaskApp.route("/activity-change", methods=["POST"])
-        def callsign_change():
+        def activity_change():
             data = request.json
             if not isinstance(data, list):
                 return 'Invalid data format. Expected a list.', 400
