@@ -115,7 +115,6 @@ class StableIntelBot(commands.Bot):
             data = request.json
             if not isinstance(data, list):
                 return 'Invalid data format. Expected a list.', 400
-            self.logger.log(20, 2)
             asyncio.run_coroutine_threadsafe(self.task_queue.put(("activity-change", data)), self.loop)
             return "", 204
 
@@ -123,7 +122,7 @@ class StableIntelBot(commands.Bot):
         # process tasks from the queue
         while True:
             task_type, data = await self.task_queue.get()
-            self.logger.log(20, task_type)
+
             if task_type == "aircraft-change":
                 await self.process_aircraft_change(data)
             elif task_type == "new-account":
@@ -133,7 +132,6 @@ class StableIntelBot(commands.Bot):
             elif task_type == "teleporation":
                 await self.process_teleportation(data)
             elif task_type == "activity-change":
-                self.logger.log(20, 1)
                 await self.process_activity_change(data)
             self.task_queue.task_done()
     
@@ -197,7 +195,6 @@ class StableIntelBot(commands.Bot):
         channel = self.get_channel_config("activity-change")
         if not channel or not self.config.get("displayActivityChanges", True):
             return
-        self.logger.log(20, data)
         embeds = [
             discord.Embed(
                 title="Activity Change",
