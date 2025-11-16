@@ -122,6 +122,7 @@ class StableIntelBot(commands.Bot):
         # process tasks from the queue
         while True:
             task_type, data = await self.task_queue.get()
+            print(task_type)
             if task_type == "aircraft-change":
                 await self.process_aircraft_change(data)
             elif task_type == "new-account":
@@ -131,6 +132,7 @@ class StableIntelBot(commands.Bot):
             elif task_type == "teleporation":
                 await self.process_teleportation(data)
             elif task_type == "activity-change":
+                print(1)
                 await self.process_activity_change(data)
             self.task_queue.task_done()
     
