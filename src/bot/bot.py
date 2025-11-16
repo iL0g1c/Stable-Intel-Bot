@@ -194,7 +194,7 @@ class StableIntelBot(commands.Bot):
         channel = self.get_channel_config("activity-change")
         if not channel or not self.config.get("displayActivityChanges", True):
             return
-        
+        print(data)
         embeds = [
             discord.Embed(
                 title="Activity Change",
