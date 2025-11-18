@@ -75,65 +75,114 @@ class StableIntelBot(commands.Bot):
             self.logger.log(40, f"Exception while syncing commands. Error: {e}")
 
         self.logger.log(20, "Launching Flask server...")
-        Thread(target=self.flaskApp.run, kwargs={"host": "127.0.0.1", "port": 5002}).start()
-        self.logger.log(20, "Connecting to discord...")
+        t = Thread(target=self.flaskApp.run, kwargs={"host": "127.0.0.1", "port": 5002}, daemon=True)
+        t.start()
+        self.logger.log(20, "Flask server launched on 127.0.0.1:5002")
+        self.loop.create_task(self._task_supervisor())
 
         self.logger.log(20, "Starting task processing loops...")
         self.loop.create_task(self.process_tasks())
 
+    async def _task_supervisor(self):
+        while True:
+            await asyncio.sleep(60)
+            # crude check: ensure task exists in all_tasks
+            found = any(
+                t.get_coro().__name__ == "process_tasks"
+                for t in asyncio.all_tasks(loop=self.loop)
+            )
+            self.logger.debug("supervisor: process_tasks running=%s", found)
+
     def setup_routes(self):
+        def schedule_to_loop(coro):
+            fut = asyncio.run_coroutine_threadsafe(coro, self.loop)
+            # log when done (if it raised)
+            def _cb(f):
+                try:
+                    f.result()
+                except Exception as e:
+                    self.logger.exception("Scheduled task raised: %s", e)
+            fut.add_done_callback(_cb)
+            return fut
         @self.flaskApp.route("/aircraft-change", methods=["POST"])
         def aircraft_change():
             data = request.json
+            self.logger.info("[Flask] /aircraft-change POST received (len=%s)", len(data) if data is not None else "None")
             if not isinstance(data, list):
+                self.logger.warning("[Flask] /aircraft-change invalid payload type: %s", type(data))
                 return 'Invalid data format. Expected a list.', 400
-            asyncio.run_coroutine_threadsafe(self.task_queue.put(("aircraft-change", data)), self.loop)
+            schedule_to_loop(self.task_queue.put(("aircraft-change", data)))
             return "", 204
+
         @self.flaskApp.route("/new-account", methods=["POST"])
         def new_account():
             data = request.json
+            self.logger.info("[Flask] /new-account POST received (len=%s)", len(data) if data is not None else "None")
             if not isinstance(data, list):
+                self.logger.warning("[Flask] /new-account invalid payload type: %s", type(data))
                 return 'Invalid data format. Expected a list.', 400
-            asyncio.run_coroutine_threadsafe(self.task_queue.put(("new-account", data)), self.loop)
+            schedule_to_loop(self.task_queue.put(("new-account", data)))
             return "", 204
+
         @self.flaskApp.route("/callsign-change", methods=["POST"])
         def callsign_change():
             data = request.json
+            self.logger.info("[Flask] /callsign-change POST received (len=%s)", len(data) if data is not None else "None")
             if not isinstance(data, list):
+                self.logger.warning("[Flask] /callsign-change invalid payload type: %s", type(data))
                 return 'Invalid data format. Expected a list.', 400
-            asyncio.run_coroutine_threadsafe(self.task_queue.put(("callsign-change", data)), self.loop)
+            schedule_to_loop(self.task_queue.put(("callsign-change", data)))
             return "", 204
+
         @self.flaskApp.route("/teleporation", methods=["POST"])
         def teleporation():
             data = request.json
+            self.logger.info("[Flask] /teleporation POST received (len=%s)", len(data) if data is not None else "None")
             if not isinstance(data, list):
+                self.logger.warning("[Flask] /teleporation invalid payload type: %s", type(data))
                 return 'Invalid data format. Expected a list.', 400
-            asyncio.run_coroutine_threadsafe(self.task_queue.put(("teleporation", data)), self.loop)
+            schedule_to_loop(self.task_queue.put(("teleporation", data)))
             return "", 204
+
         @self.flaskApp.route("/activity-change", methods=["POST"])
         def activity_change():
             data = request.json
+            self.logger.info("[Flask] /activity-change POST received (len=%s)", len(data) if data is not None else "None")
             if not isinstance(data, list):
+                self.logger.warning("[Flask] /activity-change invalid payload type: %s", type(data))
                 return 'Invalid data format. Expected a list.', 400
-            asyncio.run_coroutine_threadsafe(self.task_queue.put(("activity-change", data)), self.loop)
+            schedule_to_loop(self.task_queue.put(("activity-change", data)))
             return "", 204
-
+        
     async def process_tasks(self):
         # process tasks from the queue
+        self.logger.info("process_tasks loop started")
         while True:
             task_type, data = await self.task_queue.get()
-
-            if task_type == "aircraft-change":
-                await self.process_aircraft_change(data)
-            elif task_type == "new-account":
-                await self.process_new_account(data)
-            elif task_type == "callsign-change":
-                await self.process_callsign_change(data)
-            elif task_type == "teleporation":
-                await self.process_teleportation(data)
-            elif task_type == "activity-change":
-                await self.process_activity_change(data)
-            self.task_queue.task_done()
+            self.logger.info("Dequeued task '%s' (items=%s)", task_type, (len(data) if hasattr(data, "__len__") else "unknown"))
+            try:
+                try:
+                    if task_type == "aircraft-change":
+                        await self.process_aircraft_change(data)
+                    elif task_type == "new-account":
+                        await self.process_new_account(data)
+                    elif task_type == "callsign-change":
+                        await self.process_callsign_change(data)
+                    elif task_type == "teleporation":
+                        await self.process_teleportation(data)
+                    elif task_type == "activity-change":
+                        await self.process_activity_change(data)
+                    else:
+                        self.logger.warning("Unknown task type in queue: %s", task_type)
+                except Exception as e:
+                    # Log exception but don't let the worker die
+                    self.logger.exception("Exception while handling task '%s': %s", task_type, e)
+            finally:
+                try:
+                    self.task_queue.task_done()
+                except Exception:
+                    # defensive
+                    self.logger.exception("task_done() failed for '%s'", task_type)
     
     async def process_aircraft_change(self, data):
         channel = self.get_channel_config("aircraft-change")
@@ -211,11 +260,19 @@ class StableIntelBot(commands.Bot):
         ]
         await self.send_embeds(channel, embeds)
     
-    async def send_embeds(self, channel, embeds):
-        async with self.lock:
-            for embed in embeds:
-                await channel.send(embed=embed)
-                await asyncio.sleep(self.throttleInterval)
+        async def send_embeds(self, channel, embeds):
+            async with self.lock:
+                for idx, embed in enumerate(embeds, start=1):
+                    try:
+                        if not channel:
+                            self.logger.warning("send_embeds: channel is None, skipping embed #%d", idx)
+                            continue
+                        await channel.send(embed=embed)
+                        await asyncio.sleep(self.throttleInterval)
+                    except Exception as e:
+                        self.logger.exception("Failed to send embed #%d to channel %s: %s", idx, getattr(channel, "id", "unknown"), e)
+                        # continue to next embed (do not raise)
+
 
     def get_channel_config(self, event_type): # gets the channel for the event type
         if event_type == "aircraft-change":
