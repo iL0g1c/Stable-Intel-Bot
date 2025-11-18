@@ -260,18 +260,18 @@ class StableIntelBot(commands.Bot):
         ]
         await self.send_embeds(channel, embeds)
     
-        async def send_embeds(self, channel, embeds):
-            async with self.lock:
-                for idx, embed in enumerate(embeds, start=1):
-                    try:
-                        if not channel:
-                            self.logger.warning("send_embeds: channel is None, skipping embed #%d", idx)
-                            continue
-                        await channel.send(embed=embed)
-                        await asyncio.sleep(self.throttleInterval)
-                    except Exception as e:
-                        self.logger.exception("Failed to send embed #%d to channel %s: %s", idx, getattr(channel, "id", "unknown"), e)
-                        # continue to next embed (do not raise)
+    async def send_embeds(self, channel, embeds):
+        async with self.lock:
+            for idx, embed in enumerate(embeds, start=1):
+                try:
+                    if not channel:
+                        self.logger.warning("send_embeds: channel is None, skipping embed #%d", idx)
+                        continue
+                    await channel.send(embed=embed)
+                    await asyncio.sleep(self.throttleInterval)
+                except Exception as e:
+                    self.logger.exception("Failed to send embed #%d to channel %s: %s", idx, getattr(channel, "id", "unknown"), e)
+                    # continue to next embed (do not raise)
 
 
     def get_channel_config(self, event_type): # gets the channel for the event type
