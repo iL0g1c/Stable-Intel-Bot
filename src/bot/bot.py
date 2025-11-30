@@ -251,6 +251,9 @@ class StableIntelBot(commands.Bot):
         channel = self.get_channel_config("activity-change")
         if not channel or not self.config.get("displayActivityChanges", True):
             return
+        for activity_data in data:
+            if activity_data['acid'] == 400813:
+                await self.config.get_channel_config("xavier-detected").send(f"<@&{self.config['xavier-ping']}> is online.")
         embeds = [
             discord.Embed(
                 title="Activity Change",
@@ -285,6 +288,8 @@ class StableIntelBot(commands.Bot):
             channel = self.get_channel(self.config["teleporationLogChannel"])
         elif event_type == "activity-change":
             channel = self.get_channel(self.config["activityChangeLogChannel"])
+        elif event_type == "xavier-detected":
+            channel = self.get_channel(self.config["xavier-detected"])
         else:
             self.logger.log(40, f"Invalid event type: {event_type}")
             return None
