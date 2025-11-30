@@ -252,8 +252,8 @@ class StableIntelBot(commands.Bot):
         if not channel or not self.config.get("displayActivityChanges", True):
             return
         for activity_data in data:
-            if activity_data['acid'] == 400813:
-                await self.config.get_channel_config("xavier-detected").send(f"<@&{self.config['xavier-ping']}> is online.")
+            if activity_data['acid'] == 400813 and activity_data['status'] == 'online':
+                await self.get_channel_config("xavier-detected").send(f"<@&{self.config['xavier-ping']}> is online.")
         embeds = [
             discord.Embed(
                 title="Activity Change",
