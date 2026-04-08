@@ -123,20 +123,24 @@ class StableIntelBot(commands.Bot):
         while True:
             task_type, data = await self.task_queue.get()
 
-            if task_type == "aircraft-change":
-                await self.process_aircraft_change(data)
-            elif task_type == "new-account":
-                await self.process_new_account(data)
-            elif task_type == "callsign-change":
-                await self.process_callsign_change(data)
-            elif task_type == "teleporation":
-                await self.process_teleportation(data)
-            elif task_type == "activity-change":
-                await self.process_activity_change(data)
-            self.task_queue.task_done()
+            try:
+                if task_type == "aircraft-change":
+                    await self.process_aircraft_change(data)
+                elif task_type == "new-account":
+                    await self.process_new_account(data)
+                elif task_type == "callsign-change":
+                    await self.process_callsign_change(data)
+                elif task_type == "teleporation":
+                    await self.process_teleportation(data)
+                elif task_type == "activity-change":
+                    await self.process_activity_change(data)
+            except Exception as e:
+                self.logger.error(f"Error processing task {task_type}: {e}")
+            finally:
+                self.task_queue.task_done()
     
     async def process_aircraft_change(self, data):
-        channel = self.get_channel_config("aircraft-change")
+        channel = await self.get_channel_config("aircraft-change")
         if not channel or not self.config.get("displayAircraftChanges", True):
             return
         
@@ -150,7 +154,7 @@ class StableIntelBot(commands.Bot):
         await self.send_embeds(channel, embeds)
 
     async def process_new_account(self, data):
-        channel = self.get_channel_config("new-account")
+        channel = await self.get_channel_config("new-account")
         if not channel or not self.config.get("displayNewAccounts", True):
             return
         
@@ -164,7 +168,7 @@ class StableIntelBot(commands.Bot):
         await self.send_embeds(channel, embeds)
 
     async def process_callsign_change(self, data):
-        channel = self.get_channel_config("callsign-change")
+        channel = await self.get_channel_config("callsign-change")
         if not channel or not self.config.get("displayCallsignChanges", True):
             return
         
@@ -178,7 +182,7 @@ class StableIntelBot(commands.Bot):
         await self.send_embeds(channel, embeds)
 
     async def process_teleportation(self, data):
-        channel = self.get_channel_config("teleporation")
+        channel = await self.get_channel_config("teleporation")
         if not channel or not self.config.get("displayTeleporations", True):
             return
         
@@ -192,7 +196,7 @@ class StableIntelBot(commands.Bot):
         await self.send_embeds(channel, embeds)
 
     async def process_activity_change(self, data):
-        channel = self.get_channel_config("activity-change")
+        channel = await self.get_channel_config("activity-change")
         if not channel or not self.config.get("displayActivityChanges", True):
             return
         embeds = [
@@ -210,24 +214,32 @@ class StableIntelBot(commands.Bot):
                 await channel.send(embed=embed)
                 await asyncio.sleep(self.throttleInterval)
 
-    def get_channel_config(self, event_type): # gets the channel for the event type
+    async def get_channel_config(self, event_type): # gets the channel for the event type
         if event_type == "aircraft-change":
-            channel = self.get_channel(self.config["aircraftChangeLogChannel"])
+            channel_id = self.config["aircraftChangeLogChannel"]
         elif event_type == "new-account":
-            channel = self.get_channel(self.config["newAccountLogChannel"])
+            channel_id = self.config["newAccountLogChannel"]
         elif event_type == "callsign-change":
-            channel = self.get_channel(self.config["callsignChangeLogChannel"])
+            channel_id = self.config["callsignChangeLogChannel"]
         elif event_type == "teleporation":
-            channel = self.get_channel(self.config["teleporationLogChannel"])
+            channel_id = self.config["teleporationLogChannel"]
         elif event_type == "activity-change":
-            channel = self.get_channel(self.config["activityChangeLogChannel"])
+            channel_id = self.config["activityChangeLogChannel"]
         else:
             self.logger.log(40, f"Invalid event type: {event_type}")
             return None
 
-        if not channel:
-            self.logger.warning(f"Channel ID for '{event_type}' is not set in the configuration.")
-            return None
+        channel = self.get_channel(channel_id)
+        if channel is None:
+            try:
+                channel = await self.fetch_channel(channel_id)
+            except discord.NotFound:
+                self.logger.warning(f"Channel ID for '{event_type}' was not found.")
+                return None
+            except discord.HTTPException as e:
+                self.logger.warning(f"Failed to fetch channel for '{event_type}': {e}")
+                return None
+
         return channel
         
     async def _load_extensions(self) -> None:
