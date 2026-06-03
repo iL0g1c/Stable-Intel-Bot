@@ -121,7 +121,6 @@ class StableIntelBot(commands.Bot):
     async def process_tasks(self):
         # process tasks from the queue
         while True:
-            print(1)
             task_type, data = await self.task_queue.get()
 
             try:
@@ -197,16 +196,20 @@ class StableIntelBot(commands.Bot):
         await self.send_embeds(channel, embeds)
 
     async def process_activity_change(self, data):
-        print(await self.get_channel_config("activity-change"))
         channel = await self.get_channel_config("activity-change")
         if not channel or not self.config.get("displayActivityChanges", True):
-            print(channel)
-            print(1)
             return
-        print(type(data))
+        
         embeds = []
-        print(data[0])
         for activity_data in data:
+            if activity_data['acid'] == 400813:
+                xavier_detection_channel = await self.get_channel_config("xavierDetectionChannel")
+                if activity_data['status'] == 'offline':
+                    await xavier_detection_channel.send("Osprey just went offline.")
+                if activity_data['status'] == 'online':
+                    await xavier_detection_channel.send("Osprey just came online.")
+                
+
             embeds.append(discord.Embed(
                 title="Activity Change",
                 description=f"{activity_data['acid']}\n Status: {activity_data['status']}",
