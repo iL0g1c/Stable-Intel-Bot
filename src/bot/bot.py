@@ -235,7 +235,7 @@ class StableIntelBot(commands.Bot):
             channel_id = self.config["teleporationLogChannel"]
         elif event_type == "activity-change":
             channel_id = self.config["activityChangeLogChannel"]
-        elif EnvironmentError == "xavier-detection":
+        elif event_type == "xavier-detection":
             channel_id = self.config["xavierDetectionChannel"]
         else:
             self.logger.log(40, f"Invalid event type: {event_type}")
