@@ -204,6 +204,7 @@ class StableIntelBot(commands.Bot):
         for activity_data in data:
             if activity_data['acid'] == 400813:
                 xavier_detection_channel = await self.get_channel_config("xavierDetectionChannel")
+                print(xavier_detection_channel)
                 if activity_data['status'] == 'offline':
                     await xavier_detection_channel.send("Osprey just went offline.")
                 if activity_data['status'] == 'online':
