@@ -202,13 +202,12 @@ class StableIntelBot(commands.Bot):
         
         embeds = []
         for activity_data in data:
-            if activity_data['acid'] == 400813:
+            if activity_data['acid'] == 1:
                 xavier_detection_channel = await self.get_channel_config("xavier-detection")
-                print(xavier_detection_channel)
                 if activity_data['status'] == 'offline':
-                    await xavier_detection_channel.send("Osprey just went offline.")
+                    await xavier_detection_channel.send("<@&1511558022588137533> Xavier just went offline.")
                 if activity_data['status'] == 'online':
-                    await xavier_detection_channel.send("Osprey just came online.")
+                    await xavier_detection_channel.send("<@&1511558022588137533> Xavier just came online.")
                 
 
             embeds.append(discord.Embed(

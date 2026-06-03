@@ -8,6 +8,7 @@ import logging, time, asyncio
 from bot import StableIntelBot
 from tools.multiplayerAPI import MultiplayerAPI
 import json
+from datetime import datetime
 
 class ChatLogging(commands.Cog):
     def __init__(self, bot):
@@ -125,7 +126,7 @@ class ChatLogging(commands.Cog):
             # builds message string for discord
             discord_message = ""
             for msg in messages:
-                discord_message += f"({msg.get('acid', '?')}) | {msg.get('cs','?')}: {msg.get('msg','')}\n"
+                discord_message += f"`{datetime.now(datetime.UTC)} UTC` ({msg.get('acid', '?')}) | {msg.get('cs','?')}: {msg.get('msg','')}\n"
             if discord_message != "":
                 await chat_channel.send(discord_message, allowed_mentions=AllowedMentions.none())
         except Exception as e:
