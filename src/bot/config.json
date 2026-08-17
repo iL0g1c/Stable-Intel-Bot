@@ -5,11 +5,13 @@
     "displayChat": true,
     "displayTeleporations": true,
     "displayActivityChanges": true,
-    "aircraftChangeLogChannel": 1439394257281486881,
-    "newAccountLogChannel": 1439404624401399848,
-    "callsignChangeLogChannel": 1439394223777386496,
-    "chatLogChannel": 1439394208627822602,
-    "teleporationLogChannel": 1439394274008633567,
-    "activityChangeLogChannel": 1439394239443243068,
-    "developerRole": 1439393953974587462
+    "displayXavierDetection": false,
+    "aircraftChangeLogChannel": 1493348464422293524,
+    "newAccountLogChannel": 1493348504070783126,
+    "callsignChangeLogChannel": 1493348550916968500,
+    "chatLogChannel": 1493348612728688670,
+    "teleporationLogChannel": 1493348680865153205,
+    "activityChangeLogChannel": 1493348703031922719,
+    "developerRole": 1439393953974587462,
+    "xavierDetectionChannel": 1493348734770221158
 }

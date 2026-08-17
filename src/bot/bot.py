@@ -161,7 +161,7 @@ class StableIntelBot(commands.Bot):
         embeds = [
             discord.Embed(
                 title="New Account",
-                description=f"Acoount ID: {account_data['acid']}\n Callsign: {account_data['callsign']}",
+                description=f"Account ID: {account_data['acid']}\n Callsign: {account_data['callsign']}",
                 color=discord.Color.green()
             ) for account_data in data
         ]
@@ -199,13 +199,22 @@ class StableIntelBot(commands.Bot):
         channel = await self.get_channel_config("activity-change")
         if not channel or not self.config.get("displayActivityChanges", True):
             return
-        embeds = [
-            discord.Embed(
+        
+        embeds = []
+        for activity_data in data:
+            if activity_data['acid'] == 1:
+                xavier_detection_channel = await self.get_channel_config("xavier-detection")
+                if activity_data['status'] == 'offline':
+                    await xavier_detection_channel.send("<@&1511558022588137533> Xavier just went offline.")
+                if activity_data['status'] == 'online':
+                    await xavier_detection_channel.send("<@&1511558022588137533> Xavier just came online.")
+                
+
+            embeds.append(discord.Embed(
                 title="Activity Change",
                 description=f"{activity_data['acid']}\n Status: {activity_data['status']}",
                 color=discord.Color.green()
-            ) for activity_data in data
-        ]
+            ))
         await self.send_embeds(channel, embeds)
     
     async def send_embeds(self, channel, embeds):
@@ -225,6 +234,8 @@ class StableIntelBot(commands.Bot):
             channel_id = self.config["teleporationLogChannel"]
         elif event_type == "activity-change":
             channel_id = self.config["activityChangeLogChannel"]
+        elif event_type == "xavier-detection":
+            channel_id = self.config["xavierDetectionChannel"]
         else:
             self.logger.log(40, f"Invalid event type: {event_type}")
             return None
